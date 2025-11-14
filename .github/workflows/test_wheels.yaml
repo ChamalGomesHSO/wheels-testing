@@ -60,7 +60,7 @@ jobs:
           import tomli
           import tomli_w
 
-          pyproject_path = 'libs/zxing-cpp/pyproject.toml'
+          pyproject_path = 'pyproject.toml'
           wheel_path = '${{ steps.select-wheel.outputs.wheel_path }}'
 
           with open(pyproject_path, 'rb') as f:
