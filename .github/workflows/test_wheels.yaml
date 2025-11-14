@@ -32,12 +32,12 @@ jobs:
         run: |
           if [[ "${{ runner.os }}" == "Linux" ]]; then
             if [[ "${{ runner.arch }}" == "X64" ]]; then
-              WHEEL_PATH="wheels/zxing_cpp-2.2.1-cp37-abi3-manylinux_x86_64.whl"
+              WHEEL_PATH="wheels/zxing_cpp-2.3.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
             elif [[ "${{ runner.arch }}" == "ARM64" ]]; then
-              WHEEL_PATH="wheels/zxing_cpp-2.2.1-cp37-abi3-manylinux_aarch64.whl"
+              WHEEL_PATH="wheels/zxing_cpp-2.3.0-cp314-cp314-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl"
             fi
           elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            WHEEL_PATH="wheels/zxing_cpp-2.2.1-cp311-cp311-win_amd64.whl"
+            WHEEL_PATH="wheels/zxing_cpp-2.3.0-cp314-cp314-win_amd64.whl"
           fi
 
           if [ -z "$WHEEL_PATH" ]; then
