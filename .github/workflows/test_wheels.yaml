@@ -54,7 +54,7 @@ jobs:
           import tomli_w
 
           pyproject_path = 'pyproject.toml'
-          wheel_path = '${{ steps.select-wheel.outputs.wheel_path }}'
+          wheel_path = '../../${{ steps.select-wheel.outputs.wheel_path }}'
 
           with open(pyproject_path, 'rb') as f:
               data = tomli.load(f)
