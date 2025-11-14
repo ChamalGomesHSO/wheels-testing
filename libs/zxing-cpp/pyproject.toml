@@ -1,0 +1,11 @@
+[project]
+name = "test-zxing"
+version = "0.0.0"
+description = "Test module to test different zxing-wheels"
+dependencies = [
+  "zxing-cpp",
+]
+
+[tool.uv.sources]
+# The path for this source will be dynamically updated by the CI workflow.
+zxing-cpp = { path = "wheels/placeholder.whl" }

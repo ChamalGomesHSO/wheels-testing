@@ -1,0 +1,81 @@
+name: Test zxing-cpp wheels
+
+on:
+  workflow_dispatch:
+
+env:
+  TEST_LIBRARY: zxing-cpp
+
+jobs:
+  test-wheel:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, ubuntu-latest-arm64]
+
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Setup UV
+        uses: astral-sh/setup-uv@5a7eac68fb9809dea845d802897dc5c723910fa3 # v7.1.3
+        with:
+          activate-environment: true
+          enable-cache: false
+          cache-dependency-glob: ""
+
+      - name: Select wheel based on runner architecture
+        id: select-wheel
+        shell: bash
+        run: |
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            if [[ "${{ runner.arch }}" == "X64" ]]; then
+              WHEEL_PATH="wheels/zxing_cpp-2.2.1-cp37-abi3-manylinux_x86_64.whl"
+            elif [[ "${{ runner.arch }}" == "ARM64" ]]; then
+              WHEEL_PATH="wheels/zxing_cpp-2.2.1-cp37-abi3-manylinux_aarch64.whl"
+            fi
+          elif [[ "${{ runner.os }}" == "Windows" ]]; then
+            WHEEL_PATH="wheels/zxing_cpp-2.2.1-cp311-cp311-win_amd64.whl"
+          fi
+
+          if [ -z "$WHEEL_PATH" ]; then
+            echo "::error::Could not find a matching wheel for os=${{ runner.os }} and arch=${{ runner.arch }}"
+            exit 1
+          fi
+          
+          echo "Using wheel: $WHEEL_PATH"
+          echo "wheel_path=$WHEEL_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Install test dependencies
+        run: uv pip install pytest tomli tomli-w
+
+      - name: Update pyproject.toml with selected wheel
+        working-directory: libs/${{ env.TEST_LIBRARY }}
+        shell: bash
+        run: |
+          # Using python to reliably edit the toml file cross-platform
+          python -c "
+          import tomli
+          import tomli_w
+
+          pyproject_path = 'libs/zxing-cpp/pyproject.toml'
+          wheel_path = '${{ steps.select-wheel.outputs.wheel_path }}'
+
+          with open(pyproject_path, 'rb') as f:
+              data = tomli.load(f)
+
+          data['tool']['uv']['sources']['zxing-cpp']['path'] = wheel_path
+
+          with open(pyproject_path, 'wb') as f:
+              tomli_w.dump(data, f)
+          "
+
+      - name: Install dependencies using uv
+        working-directory: libs/${{ env.TEST_LIBRARY }}
+        run: uv pip install .
+
+      - name: Run tests with pytest
+        working-directory: libs/${{ env.TEST_LIBRARY }}
+        run: pytest
